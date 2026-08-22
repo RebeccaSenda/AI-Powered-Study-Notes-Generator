@@ -2,85 +2,167 @@ import streamlit as st
 import ollama
 from PyPDF2 import PdfReader
 
-# Page configuration
+# ---------------------------------------------------------
+# PAGE CONFIGURATION
+# ---------------------------------------------------------
+
 st.set_page_config(
-    page_title="AI Study Notes Generator",
+    page_title="AI Study Buddy",
     page_icon="📚",
     layout="wide"
 )
 
-# Custom styling
+# ---------------------------------------------------------
+# CUSTOM STYLING
+# ---------------------------------------------------------
+
 st.markdown("""
 <style>
-.main-title {
-    text-align: center;
-    font-size: 42px;
-    font-weight: bold;
-}
 
-.subtitle {
-    text-align: center;
-    font-size: 18px;
-}
+    /* Main background */
+    .stApp {
+        background: linear-gradient(135deg, #f7f9ff 0%, #f3efff 100%);
+    }
+
+    /* Main title */
+    .main-title {
+        text-align: center;
+        font-size: 46px;
+        font-weight: 800;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    /* Subtitle */
+    .subtitle {
+        text-align: center;
+        font-size: 19px;
+        color: #555555;
+        margin-bottom: 20px;
+    }
+
+    /* Welcome message */
+    .welcome-box {
+        background: white;
+        padding: 20px;
+        border-radius: 18px;
+        text-align: center;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    }
+
+    /* Section headers */
+    .section-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    /* Study mode cards */
+    .mode-card {
+        background: white;
+        padding: 18px;
+        border-radius: 16px;
+        text-align: center;
+        min-height: 125px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        margin-bottom: 15px;
+    }
+
+    .mode-card h3 {
+        margin-bottom: 8px;
+    }
+
+    .mode-card p {
+        color: #666666;
+        font-size: 14px;
+    }
+
+    /* Footer */
+    .footer {
+        text-align: center;
+        color: #777777;
+        font-size: 13px;
+        margin-top: 35px;
+        padding: 20px;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
-# Header
+# ---------------------------------------------------------
+# HEADER
+# ---------------------------------------------------------
+
 st.markdown(
-    '<div class="main-title">📚 AI-Powered Study Assistant</div>',
+    '<div class="main-title">📚 AI Study Buddy</div>',
     unsafe_allow_html=True
 )
 
 st.markdown(
     '<div class="subtitle">'
-    'Transform your study material into notes, revision points, '
-    'exam questions, or flashcards using AI.'
+    'Turn your lecture material into smarter ways to study.'
     '</div>',
     unsafe_allow_html=True
 )
 
+st.markdown("""
+<div class="welcome-box">
+    <h3>✨ Ready to study smarter?</h3>
+    <p>
+        Upload your lecture material, choose how you want to study,
+        and let your AI study buddy do the hard work.
+    </p>
+    <p><strong>You've got this! 💪📖</strong></p>
+</div>
+""", unsafe_allow_html=True)
+
 st.divider()
 
-# Study mode
-st.subheader("🎯 Choose a Study Mode")
+# ---------------------------------------------------------
+# STUDY MATERIAL
+# ---------------------------------------------------------
 
-study_mode = st.selectbox(
-    "What would you like to generate?",
-    [
-        "📚 Study Notes",
-        "⚡ Quick Revision",
-        "❓ Exam Questions",
-        "🧠 Flashcards"
-    ]
+st.markdown(
+    '<div class="section-title">📖 Bring Your Study Material</div>',
+    unsafe_allow_html=True
 )
 
-# Study material section
-st.subheader("📖 Study Material")
+st.write(
+    "Upload a lecture PDF or paste your notes below. "
+    "We'll turn them into useful study resources."
+)
 
 input_method = st.radio(
-    "How would you like to provide your study material?",
+    "Choose how you want to provide your material:",
     ["📄 Upload PDF", "✍️ Paste Text"],
     horizontal=True
 )
 
 study_material = ""
 
-# PDF Upload
+# ---------------------------------------------------------
+# PDF UPLOAD
+# ---------------------------------------------------------
+
 if input_method == "📄 Upload PDF":
 
     uploaded_file = st.file_uploader(
-        "Upload your lecture notes or study material as a PDF",
+        "📄 Drop your lecture PDF here or browse your files",
         type=["pdf"]
     )
 
     if uploaded_file is not None:
 
         try:
+
             pdf_reader = PdfReader(uploaded_file)
 
             extracted_text = ""
 
             for page in pdf_reader.pages:
+
                 page_text = page.extract_text()
 
                 if page_text:
@@ -91,13 +173,14 @@ if input_method == "📄 Upload PDF":
                 study_material = extracted_text
 
                 st.success(
-                    f"✅ PDF uploaded successfully! "
-                    f"Extracted text from {len(pdf_reader.pages)} page(s)."
+                    f"🎉 Nice! We successfully read "
+                    f"{len(pdf_reader.pages)} page(s) from your PDF."
                 )
 
-                with st.expander("👀 Preview Extracted Text"):
+                with st.expander("👀 Preview your study material"):
+
                     st.text_area(
-                        "Extracted content",
+                        "Extracted text",
                         extracted_text,
                         height=250
                     )
@@ -105,29 +188,77 @@ if input_method == "📄 Upload PDF":
             else:
 
                 st.warning(
-                    "⚠️ No readable text was found in this PDF. "
-                    "Please try another PDF or paste the text manually."
+                    "⚠️ We couldn't find readable text in this PDF. "
+                    "Try another PDF or paste your material instead."
                 )
 
         except Exception as e:
 
             st.error(
-                "❌ There was a problem reading the PDF."
+                "❌ Something went wrong while reading the PDF."
             )
 
             st.code(str(e))
 
-# Manual text input
+# ---------------------------------------------------------
+# TEXT INPUT
+# ---------------------------------------------------------
+
 else:
 
     study_material = st.text_area(
-        "Paste your lecture notes, textbook content, or study material here:",
+        "✍️ Paste your lecture notes, textbook content, "
+        "or study material here:",
         height=300,
-        placeholder="Paste your study material here..."
+        placeholder="Paste your study material here and let's get studying! 📚"
     )
 
+# ---------------------------------------------------------
+# STUDY MODES
+# ---------------------------------------------------------
 
-# Generate the AI prompt based on the selected mode
+st.markdown(
+    '<div class="section-title">🎯 What Are We Studying Today?</div>',
+    unsafe_allow_html=True
+)
+
+st.write(
+    "Choose the study tool that matches what you need right now."
+)
+
+study_mode = st.selectbox(
+    "Choose a study mode:",
+    [
+        "📚 Study Notes",
+        "⚡ Quick Revision",
+        "❓ Exam Questions",
+        "🧠 Flashcards"
+    ]
+)
+
+# Study mode explanation
+
+mode_descriptions = {
+    "📚 Study Notes":
+        "Organize your material into clear notes, concepts and definitions.",
+
+    "⚡ Quick Revision":
+        "Get the important information you need for a fast review.",
+
+    "❓ Exam Questions":
+        "Challenge yourself with MCQs, short answers and essay questions.",
+
+    "🧠 Flashcards":
+        "Practice active recall with AI-generated question-and-answer cards."
+}
+
+st.info(
+    f"💡 **{study_mode}** — {mode_descriptions[study_mode]}"
+)
+
+# ---------------------------------------------------------
+# AI PROMPTS
+# ---------------------------------------------------------
 
 if study_mode == "📚 Study Notes":
 
@@ -244,20 +375,26 @@ Study material:
 {study_material}
 """
 
+# ---------------------------------------------------------
+# GENERATE
+# ---------------------------------------------------------
 
-# Generate button
+st.divider()
 
-if st.button("✨ Generate", type="primary"):
+if st.button("✨ Generate My Study Material", type="primary"):
 
     if not study_material.strip():
 
         st.warning(
-            "⚠️ Please upload a PDF or enter some study material before generating."
+            "📖 Please upload a PDF or paste some study material first!"
         )
 
     else:
 
-        with st.spinner("🧠 AI is preparing your study material..."):
+        with st.spinner(
+            "🧠 Your AI study buddy is working... "
+            "Give it a moment!"
+        ):
 
             try:
 
@@ -275,15 +412,24 @@ if st.button("✨ Generate", type="primary"):
 
                 st.divider()
 
-                st.subheader("📚 Generated Content")
+                st.markdown(
+                    '<div class="section-title">'
+                    '🎉 Your Study Material Is Ready!'
+                    '</div>',
+                    unsafe_allow_html=True
+                )
 
                 st.markdown(generated_content)
 
                 st.download_button(
-                    label="💾 Download Study Material",
+                    label="💾 Download My Study Material",
                     data=generated_content,
                     file_name="study_material.txt",
                     mime="text/plain"
+                )
+
+                st.success(
+                    "🎉 Great job! One step closer to mastering your material. 💪"
                 )
 
             except Exception as e:
@@ -294,3 +440,15 @@ if st.button("✨ Generate", type="primary"):
                 )
 
                 st.code(str(e))
+
+# ---------------------------------------------------------
+# FOOTER
+# ---------------------------------------------------------
+
+st.markdown("""
+<div class="footer">
+    📚 AI Study Buddy • BIT 4543 Artificial Intelligence Group Project
+    <br>
+    <em>Study smarter. Revise better. You've got this! 💪✨</em>
+</div>
+""", unsafe_allow_html=True)
