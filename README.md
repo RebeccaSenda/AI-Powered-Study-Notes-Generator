@@ -1,220 +1,153 @@
-AI-Powered Study Notes Generator
+# AI-Powered Study Notes Generator
 
-Project Overview
-
-
+## Project Overview
 
 The AI-Powered Study Notes Generator is a Generative AI application designed to help university students study more efficiently.
 
+Students can upload lecture materials in PDF format or paste study material directly into the application. The system processes the material and uses a locally running AI model to generate useful study resources.
 
+The application also implements Retrieval-Augmented Generation (RAG). RAG allows the system to retrieve relevant information from the uploaded course material before generating answers, helping the AI provide responses that are grounded in the student's material.
 
-Students can upload lecture materials in PDF format or paste their study material directly into the application. The system extracts the content and uses a locally running AI model to generate different study resources.
+The project uses Llama 3.2 3B through Ollama, allowing AI processing to take place locally without requiring a paid cloud AI API or API key.
 
+---
 
+## Features
 
-The application uses Llama 3.2 3B through Ollama, allowing the AI processing to take place locally without requiring a paid cloud AI API or API key.
+### PDF Upload
 
+Students can upload lecture notes and other educational material in PDF format.
 
+The application automatically extracts readable text from the uploaded document using PyPDF2.
 
-Features
-
-📄 PDF Upload
-
-
-
-Students can upload lecture notes and other educational material in PDF format. The application automatically extracts readable text from the document.
-
-
-
-✍️ Text Input
-
-
+### Text Input
 
 Students can also paste lecture notes, textbook content, or other study material directly into the application.
 
-
-
-📚 Study Notes
-
-
+### Study Notes
 
 Generates organized study notes containing:
 
+- Summary
+- Key concepts
+- Important definitions
+- Important points to remember
+- Possible exam questions
 
-
-Summary
-
-Key concepts
-
-Important definitions
-
-Important points to remember
-
-Possible exam questions
-
-⚡ Quick Revision
-
-
+### Quick Revision
 
 Creates a concise revision sheet containing:
 
+- Key ideas
+- Important terms
+- Must-remember information
+- Exam tips
 
-
-Key ideas
-
-Important terms
-
-Must-remember information
-
-Exam tips
-
-❓ Exam Questions
-
-
+### Exam Questions
 
 Generates:
 
+- 5 multiple-choice questions
+- 3 short-answer questions
+- 2 essay questions
 
+### Flashcards
 
-5 multiple-choice questions
+Generates 8 question-and-answer flashcards based on the uploaded study material.
 
-3 short-answer questions
+### AI Tutor
 
-2 essay questions
+The AI Tutor allows students to ask questions about their uploaded course material.
 
-🧠 Flashcards
+The system retrieves relevant sections of the uploaded material using RAG and provides them to the AI model as context before generating an answer.
 
+If the requested information cannot be found in the uploaded course material, the AI is instructed to clearly state that the information is not available in the uploaded material.
 
+### Retrieval-Augmented Generation (RAG)
 
-Generates 8 question-and-answer flashcards based on the provided study material.
+The project uses RAG to improve the reliability of AI-generated answers.
 
+The RAG pipeline:
 
+1. Extracts the uploaded study material.
+2. Splits the material into smaller chunks.
+3. Creates embeddings for the chunks.
+4. Stores the embeddings in ChromaDB.
+5. Converts the student's question into an embedding.
+6. Retrieves the most relevant course-material chunks.
+7. Provides the retrieved material to Llama as context.
+8. Generates an answer based on the retrieved material.
 
-💾 Download
+### Download
 
+Students can download generated study material as a text file for later revision.
 
+---
 
-Students can download the generated study material as a text file for later revision.
+## Technologies Used
 
+- Python - Main programming language
+- Streamlit - Web application framework
+- Ollama - Local AI platform
+- Llama 3.2 3B - Generative AI model
+- ChromaDB - Vector database used for RAG
+- Nomic Embed Text - Embedding model
+- PyPDF2 - PDF text extraction
+- Git - Version control
+- GitHub - Project hosting
 
+---
 
-Technologies Used
+## AI Topic
 
-Python — Main programming language
+### Generative AI, Text Generation, Summarization and Retrieval-Augmented Generation
 
-Streamlit — Web application framework
+The project demonstrates how Generative AI can be used to process educational content and create personalized study resources.
 
-Ollama — Local AI platform
+The project also demonstrates Retrieval-Augmented Generation (RAG), where relevant information is retrieved from a knowledge base and supplied to a language model before generating an answer.
 
-Llama 3.2 3B — Generative AI model
+---
 
-PyPDF2 — PDF text extraction
+## System Architecture
 
-GitHub — Version control and project hosting
+The main system workflow is:
 
-AI Topic
-
-
-
-Text Generation and Summarization
-
-
-
-The project demonstrates the use of Generative AI to process educational content and create useful study resources for students.
-
-
-
-System Workflow
-
+```text
 Student
-
-&#x20;  ↓
-
-Upload PDF or Paste Text
-
-&#x20;  ↓
-
-Extract / Read Study Material
-
-&#x20;  ↓
-
-Select Study Mode
-
-&#x20;  ↓
-
-Llama 3.2 3B via Ollama
-
-&#x20;  ↓
-
-Generate Study Resource
-
-&#x20;  ↓
-
-Display Results
-
-&#x20;  ↓
-
-Download Material
-
-How It Works
-
-The student uploads a PDF or enters study material manually.
-
-If a PDF is uploaded, PyPDF2 extracts the readable text.
-
-The student selects a study mode.
-
-The application creates a prompt based on the selected mode.
-
-The study material is sent to the locally running Llama 3.2 3B model through Ollama.
-
-The AI generates the requested study resource.
-
-The generated material is displayed in the Streamlit interface.
-
-The student can download the generated material.
-
-Installation
-
-1\. Clone the repository
-
-git clone <YOUR-GITHUB-REPOSITORY-URL>
-
-2\. Open the project folder
-
-cd AI-Powered-Study-Notes-Generator
-
-3\. Install the required Python packages
-
-pip install -r requirements.txt
-
-4\. Install Ollama
-
-
-
-Install Ollama and make sure the required Llama model is available locally.
-
-
-
-The application currently uses:
-
-
-
-llama3.2:3b
-
-5\. Run the application
-
-python -m streamlit run app.py
-
-
-
-The application will open in a web browser.
-
-
-
-Project Team
-
-
-
-BIT 4543 Artificial Intelligence Group Project
-
+   |
+   v
+Upload PDF / Paste Text
+   |
+   v
+Extract Study Material
+   |
+   v
+Split Material into Chunks
+   |
+   v
+Create Embeddings
+   |
+   v
+Store in ChromaDB
+   |
+   v
+Student Selects Study Mode
+   |
+   +----------------------------+
+   |                            |
+   v                            v
+Study Resources             AI Tutor
+   |                            |
+   |                     Retrieve Relevant
+   |                     Course Material
+   |                            |
+   |                            v
+   |                       Llama 3.2 3B
+   |                            |
+   +------------+---------------+
+                |
+                v
+         Display Results
+                |
+                v
+        Download Material
