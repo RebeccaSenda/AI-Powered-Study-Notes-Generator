@@ -443,64 +443,27 @@ Study material:
 {study_material}
 """
 
-
 elif study_mode == "❓ Exam Questions":
 
     prompt = f"""
 You are an AI university exam preparation assistant.
 
-Create exam questions based ONLY on the study material below.
+Use ONLY the study material below.
 
-Create:
+Generate exactly 5 multiple-choice questions.
 
-## Multiple Choice Questions
-Create 5 multiple-choice questions.
-Give 4 options for each question.
-Clearly identify the correct answer.
+For each question:
+- Give 4 options: A, B, C, D.
+- Clearly provide the correct answer.
+- Base every question only on the study material.
 
-## Short Answer Questions
-Create 3 short-answer questions.
-
-## Essay Questions
-Create 2 essay-style questions.
-
-Make the questions appropriate for a university student.
+Do not generate short-answer questions.
+Do not generate essay questions.
 
 Study material:
 
 {study_material}
 """
-
-
-else:
-
-    prompt = f"""
-You are an AI study assistant.
-
-Create study flashcards from the material below.
-
-Create 8 flashcards.
-
-Use this format:
-
-### Flashcard 1
-**Question:** ...
-**Answer:** ...
-
-### Flashcard 2
-**Question:** ...
-**Answer:** ...
-
-Continue until you have created 8 flashcards.
-
-Questions should test important concepts, definitions,
-and facts from the material.
-
-Study material:
-
-{study_material}
-"""
-
 # ---------------------------------------------------------
 # GENERATE STUDY MATERIAL USING RAG
 # ---------------------------------------------------------
@@ -519,109 +482,98 @@ if st.button(
     else:
 
         with st.spinner(
-            "🧠 Your AI study buddy is searching your course material..."
+            "🧠 Your AI study buddy is working... "
+            "Give it a moment!"
         ):
 
             try:
 
                 # -------------------------------------------------
-                # RETRIEVE RELEVANT COURSE MATERIAL
+                # EXAM QUESTIONS MODE
                 # -------------------------------------------------
 
-                retrieval_query = f"""
-                Create study material for the following task:
+                if study_mode == "❓ Exam Questions":
 
-                {study_mode}
+                    # Retrieve relevant course material using RAG
+                    relevant_chunks = retrieve_relevant_chunks(
+                        "important concepts definitions programming modules functions arguments parameters",
+                        number_of_results=4
+                    )
 
-                The student wants useful educational content
-                based on the uploaded course material.
-                """
+                    exam_context = "\n\n".join(relevant_chunks)
 
-                relevant_chunks = retrieve_relevant_chunks(
-                    retrieval_query,
-                    number_of_results=4
-                )
-
-                context = "\n\n".join(relevant_chunks)
-
-                # -------------------------------------------------
-                # CREATE RAG-BASED PROMPT
-                # -------------------------------------------------
-
-                rag_prompt = f"""
-You are an AI teaching assistant helping a university student.
-
-The student selected ONE study mode:
-
-{study_mode}
-
-IMPORTANT:
-Generate ONLY the selected study mode.
-Do NOT generate content for any other study mode.
+                    # Generate all exam questions in ONE AI call
+                    exam_response = ollama.chat(
+                        model="llama3.2:3b",
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": f"""
+You are a university exam question generator.
 
 Use ONLY the retrieved course material below.
-Do not invent information that is not supported by
-the retrieved material.
 
-RETRIEVED COURSE MATERIAL:
---------------------------------
+You MUST generate ALL THREE sections.
 
-{context}
+Your response MUST contain exactly:
 
---------------------------------
+## Multiple Choice Questions
 
-SELECTED STUDY MODE INSTRUCTIONS:
+Create exactly 5 multiple-choice questions.
 
-If the selected mode is Study Notes:
-Create:
-1. Summary
-2. Key Concepts
-3. Important Definitions
-4. Important Points to Remember
-5. 3 Possible Exam Questions
+For EACH question:
+- Give exactly four options: A, B, C, D.
+- Clearly state the correct answer.
 
-If the selected mode is Quick Revision:
-Create:
-1. Key Ideas
-2. Important Terms
-3. Must Remember
-4. Exam Tips
+## Short Answer Questions
 
-If the selected mode is Exam Questions:
-Create:
-1. 5 Multiple-Choice Questions with answers
-2. 3 Short-Answer Questions
-3. 2 Essay Questions
+Create exactly 3 short-answer questions.
+Do not provide answers.
 
-If the selected mode is Flashcards:
-Create exactly 8 flashcards.
-Each flashcard must contain a question and answer.
+## Essay Questions
 
-IMPORTANT RULES:
-- Generate ONLY the selected mode.
-- Do not include the names or content of other modes.
-- Base the answer on the retrieved course material.
-- Do not use HTML, SVG, links, or website references.
-- Keep the language simple and suitable for a university student.
-- If the retrieved material does not contain enough information,
-  clearly say so instead of inventing an answer.
-"""                # -------------------------------------------------
-                # ASK LLAMA
+Create exactly 2 essay-style questions.
+Do not provide answers.
+
+IMPORTANT:
+- Generate all 10 questions before finishing.
+- Do not generate Study Notes.
+- Do not generate Quick Revision.
+- Do not generate Flashcards.
+- Do not add an introduction or conclusion.
+- Base every question ONLY on the retrieved course material.
+
+Retrieved course material:
+
+{exam_context}
+"""
+                            }
+                        ]
+                    )
+
+                    generated_content = exam_response[
+                        "message"
+                    ]["content"]
+                # -------------------------------------------------
+                # ALL OTHER STUDY MODES
                 # -------------------------------------------------
 
-                response = ollama.chat(
-                    model="llama3.2:3b",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": rag_prompt
-                        }
-                    ]
-                )
+                else:
 
-                generated_content = response[
-                    "message"
-                ]["content"]
+                    response = ollama.chat(
+                        model="llama3.2:3b",
+                        messages=[
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ]
+                    )
+
+                    generated_content = response[
+                        "message"
+                    ]["content"]
+
 
                 # -------------------------------------------------
                 # DISPLAY RESULT
@@ -638,34 +590,6 @@ IMPORTANT RULES:
 
                 st.markdown(generated_content)
 
-                # -------------------------------------------------
-                # SHOW RAG INFORMATION
-                # -------------------------------------------------
-
-                with st.expander(
-                    "🔎 View the course material used by AI"
-                ):
-
-                    st.write(
-                        "The AI retrieved the following "
-                        "course material from the RAG knowledge base:"
-                    )
-
-                    for i, chunk in enumerate(
-                        relevant_chunks,
-                        start=1
-                    ):
-
-                        st.markdown(
-                            f"**Retrieved Chunk {i}**"
-                        )
-
-                        st.write(chunk)
-
-                # -------------------------------------------------
-                # DOWNLOAD
-                # -------------------------------------------------
-
                 st.download_button(
                     label="💾 Download My Study Material",
                     data=generated_content,
@@ -674,148 +598,21 @@ IMPORTANT RULES:
                 )
 
                 st.success(
-                    "🎉 Great job! Your study material was generated "
-                    "using your uploaded course material. 💪"
+                    "🎉 Great job! One step closer to mastering "
+                    "your material. 💪"
                 )
+
 
             except Exception as e:
 
                 st.error(
-                    "❌ Something went wrong while generating "
-                    "your study material."
-                )
-
-                st.code(str(e))
-# ---------------------------------------------------------
-# AI TUTOR - ASK QUESTIONS
-# ---------------------------------------------------------
-
-st.divider()
-
-st.markdown(
-    '<div class="section-title">🤖 Ask Your AI Study Buddy</div>',
-    unsafe_allow_html=True
-)
-
-st.write(
-    "Have a question about your uploaded course material? "
-    "Ask your AI study buddy and get an answer based on your material."
-)
-
-student_question = st.text_area(
-    "💬 What would you like to know?",
-    height=120,
-    placeholder="Example: What is the difference between pass by value and pass by reference?"
-)
-
-if st.button("🤖 Ask AI", type="primary"):
-
-    if not study_material.strip():
-
-        st.warning(
-            "📖 Please upload a PDF or paste your study material first!"
-        )
-
-    elif not student_question.strip():
-
-        st.warning(
-            "💬 Please enter a question first!"
-        )
-
-    else:
-
-        with st.spinner(
-            "🧠 Your AI study buddy is finding the answer..."
-        ):
-
-            try:
-
-                # Retrieve relevant course material
-                relevant_chunks = retrieve_relevant_chunks(
-                    student_question,
-                    number_of_results=4
-                )
-
-                context = "\n\n".join(relevant_chunks)
-
-                # Create question-answering prompt
-                tutor_prompt = f"""
-You are an AI teaching assistant helping a university student.
-
-Answer the student's question using ONLY the retrieved
-course material provided below.
-
-IMPORTANT RULES:
-
-1. Use the course material as your primary source.
-2. Do not invent information.
-3. If the answer cannot be found in the course material,
-   clearly say that the information is not available
-   in the uploaded course material.
-4. Explain the answer in simple language.
-5. Give an example when it helps explain the concept.
-
-Retrieved course material:
-
-{context}
-
-Student question:
-
-{student_question}
-
-Provide a clear and educational answer.
-"""
-
-                response = ollama.chat(
-                    model="llama3.2:3b",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": tutor_prompt
-                        }
-                    ]
-                )
-
-                tutor_answer = response[
-                    "message"
-                ]["content"]
-
-                st.divider()
-
-                st.markdown(
-                    '<div class="section-title">'
-                    '💡 AI Tutor Answer'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
-
-                st.markdown(tutor_answer)
-
-                st.success(
-                    "📚 Answer generated using your uploaded "
-                    "course material!"
-                )
-
-            except Exception as e:
-
-                st.error(
-                    "❌ Unable to generate an answer. "
+                    "❌ Unable to connect to the AI model. "
                     "Please make sure Ollama is running."
                 )
 
                 st.code(str(e))
 
-# ---------------------------------------------------------
-# FOOTER
-# ---------------------------------------------------------
 
-st.markdown("""
-<div class="footer">
-    📚 AI Study Buddy • BIT 4543 Artificial Intelligence Group Project
-    <br>
-    <em>Study smarter. Revise better. You've got this! 💪✨</em>
-</div>
-""", unsafe_allow_html=True)
 # ---------------------------------------------------------
 # FOOTER
 # ---------------------------------------------------------
