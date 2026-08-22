@@ -464,6 +464,38 @@ Study material:
 
 {study_material}
 """
+elif study_mode == "🧠 Flashcards":
+
+    prompt = f"""
+You are an AI study assistant helping a university student.
+
+Create exactly 8 flashcards based ONLY on the study material below.
+
+Each flashcard must contain:
+
+Card 1
+Question: ...
+Answer: ...
+
+Card 2
+Question: ...
+Answer: ...
+
+Continue until Card 8.
+
+IMPORTANT:
+- Create exactly 8 flashcards.
+- Keep questions clear and useful for exam revision.
+- Answers must be based ONLY on the study material.
+- Do not invent information.
+- Do not create study notes.
+- Do not create exam questions.
+- Do not create a quick revision sheet.
+
+Study material:
+
+{study_material}
+"""
 # ---------------------------------------------------------
 # GENERATE STUDY MATERIAL USING RAG
 # ---------------------------------------------------------
