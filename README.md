@@ -151,3 +151,112 @@ Study Resources             AI Tutor
                 |
                 v
         Download Material
+## How to Run the Application
+
+### 1. Requirements
+
+Before running the AI-Powered Study Notes Generator, install:
+
+* Python 3.13 or a compatible Python version
+* Ollama
+* Git (optional, if cloning the repository)
+
+The application uses the following Python packages:
+
+* Streamlit
+* Ollama
+* PyPDF2
+* ChromaDB
+
+### 2. Download the Project
+
+Clone the GitHub repository:
+
+```bash
+git clone https://github.com/RebeccaSenda/AI-Powered-Study-Notes-Generator.git
+```
+
+Open the project folder:
+
+```bash
+cd AI-Powered-Study-Notes-Generator
+```
+
+Alternatively, download the repository as a ZIP file from GitHub and extract it.
+
+### 3. Install the Python Dependencies
+
+Inside the project folder, open PowerShell or Command Prompt and run:
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs the Python libraries required by the application.
+
+### 4. Install and Set Up Ollama
+
+Install Ollama on the computer.
+
+Then download the Llama 3.2 model used by the application:
+
+```bash
+ollama pull llama3.2:3b
+```
+
+The application also uses the `nomic-embed-text` model to create embeddings for the RAG system:
+
+```bash
+ollama pull nomic-embed-text
+```
+
+Make sure Ollama is running before starting the application.
+
+### 5. Run the Application
+
+From inside the project folder, run:
+
+```bash
+python -m streamlit run app.py
+```
+
+Streamlit will provide a local address similar to:
+
+```text
+http://localhost:8501
+```
+
+Open this address in a web browser.
+
+### 6. Using the Application
+
+1. Upload a lecture PDF or paste study material into the application.
+2. Allow the system to process the material.
+3. The material is divided into chunks and stored in the ChromaDB knowledge base using embeddings.
+4. Select a study mode:
+
+   * Study Notes
+   * Quick Revision
+   * Exam Questions
+   * Flashcards
+5. Click **Generate My Study Material**.
+6. Review the AI-generated study resources.
+7. Use the download button to save the generated material.
+
+The application also provides an **AI Tutor** that can answer questions using relevant information retrieved from the uploaded course material.
+
+### 7. Important Note
+
+The AI-Powered Study Notes Generator runs the Llama 3.2 model locally through Ollama. Therefore, Ollama must be installed and running on the computer for the AI generation and RAG features to work.
+
+The complete project source code is available in this GitHub repository:
+
+https://github.com/RebeccaSenda/AI-Powered-Study-Notes-Generator
+
+Group Members
+1. Ali Mohamoud Ahmed
+2. Takunda Muchena
+3. Tanya Munyimani
+4. Rebecca Senda
+5. Raheem Raheel
+6. Zoni Islam
